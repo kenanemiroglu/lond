@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Satıcı360 — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo"></div>
+        <h1>Satıcı360</h1>
+      </div>
+      <div class="nav" id="nav">
+        <button data-route="#/overview" class="active">📊 Genel Bakış</button>
+        <button data-route="#/orders">🧾 Siparişler</button>
+        <button data-route="#/products">📦 Ürünler</button>
+        <button data-route="#/costs">💸 Maliyet Yükle</button>
+        <button data-route="#/commission">% Komisyon Kuralları</button>
+        <button data-route="#/mock">🧪 Mock Üret</button>
+        <button data-route="#/profiles">🗂️ Mock Profilleri</button>
+        <div class="divider"></div>
+        <button data-route="#/reports">📥 Raporlar</button>
+      </div>
+      <div class="hint" style="margin-top:10px">v2 • güzel ve hızlı arayüz</div>
+    </aside>
+
+    <header class="top">
+      <div class="row">
+        <div class="pill">⚙️ API: <span id="apiState">bekleniyor…</span></div>
+        <div class="pill">🧵 Worker: <span id="workerState">—</span></div>
+      </div>
+      <div class="search"><input placeholder="Ara (SKU, sipariş, ürün)…" id="q"/></div>
+    </header>
+
+    <main class="main">
+      <!-- Overview -->
+      <section id="overview" class="section active">
+        <div class="grid cols-4">
+          <div class="card"><h3>Günlük Net Ciro</h3><div class="kpi"><div class="num" id="kpi_revenue">—</div><small class="pill">TL</small></div></div>
+          <div class="card"><h3>Kâr</h3><div class="kpi"><div class="num" id="kpi_profit">—</div><small class="pill success">TL</small></div></div>
+          <div class="card"><h3>İade Oranı</h3><div class="kpi"><div class="num" id="kpi_return">—</div><small class="pill warn">%</small></div></div>
+          <div class="card"><h3>İptal Oranı</h3><div class="kpi"><div class="num" id="kpi_cancel">—</div><small class="pill danger">%</small></div></div>
+        </div>
+        <div class="grid cols-2" style="margin-top:14px">
+          <div class="card"><h3>Son 30 Gün — Net Ciro & Kâr</h3><canvas id="chart"></canvas></div>
+          <div class="card"><h3>Son 20 Sipariş</h3>
+            <table class="table" id="tbl_orders"><thead><tr><th>Tarih</th><th>No</th><th>Adet</th><th>Net</th><th>Kâr</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Orders -->
+      <section id="orders" class="section">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <h3>Son Siparişler</h3>
+            <button class="btn ghost" id="btn_export_daily">Günlük CSV indir</button>
+          </div>
+          <table class="table" id="orders_list"><thead><tr><th>Tarih</th><th>Sipariş</th><th>Ürün</th><th>Net</th><th>Kâr</th><th>Durum</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- Products -->
+      <section id="products" class="section">
+        <div class="card">
+          <h3>Ürünler</h3>
+          <table class="table" id="products_list"><thead><tr><th>SKU</th><th>Başlık</th><th>Kategori</th><th>Birim Maliyet</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- Costs Upload -->
+      <section id="costs" class="section">
+        <div class="card">
+          <h3>Maliyet Yükleme (CSV)</h3>
+          <div class="row">
+            <div class="input"><label>CSV Dosyası</label><input type="file" id="costFile" accept=".csv"/></div>
+            <button class="btn" id="btn_cost_upload">Yükle</button>
+            <span id="costStatus" class="hint"></span>
+            <a class="btn secondary" href="/api/export/products.csv">Ürün CSV indir</a>
+          </div>
+          <div class="hint">Kolonlar: <code>sku,unit_cost,effective_from</code></div>
+        </div>
+      </section>
+
+      <!-- Commission Rules -->
+      <section id="commission" class="section">
+        <div class="card">
+          <h3>Komisyon Kuralları</h3>
+          <div class="row">
+            <div class="input"><label>Shop ID</label><input id="shopId" placeholder="uuid"/></div>
+            <div class="input"><label>Kategori</label><input id="category" placeholder="örn: Giyim"/></div>
+            <div class="input"><label>Oran %</label><input id="rate" type="number" step="0.01"/></div>
+            <button class="btn" id="addRule">Ekle / Güncelle</button>
+            <button class="btn ghost" id="loadRules">Kuralları Yükle</button>
+          </div>
+          <pre id="rulesOut" style="margin-top:10px"></pre>
+        </div>
+      </section>
+
+      <!-- Mock Generate -->
+      <section id="mock" class="section">
+        <div class="card">
+          <h3>Mock Veri Oluştur</h3>
+          <form id="mockForm" class="row" onsubmit="return false;">
+            <div class="input"><label>Gün</label><input id="days" type="number" value="30" min="1"></div>
+            <div class="input"><label>Günlük Adet</label><input id="per_day" type="number" value="50" min="1"></div>
+            <div class="input"><label>İade %</label><input id="return_rate" type="number" value="7" step="0.1"></div>
+            <div class="input"><label>İptal %</label><input id="cancel_rate" type="number" value="2" step="0.1"></div>
+            <div class="input"><label>Kupon %</label><input id="coupon_rate" type="number" value="10" step="0.1"></div>
+            <button class="btn" id="btn_mock_start">Başlat</button>
+            <span id="mockStatus" class="hint"></span>
+          </form>
+        </div>
+      </section>
+
+      <!-- Profiles -->
+      <section id="profiles" class="section">
+        <div class="card">
+          <h3>Mock Profilleri</h3>
+          <details>
+            <summary>Profil Oluştur/Güncelle</summary>
+            <div class="row" style="margin-top:10px">
+              <div class="input" style="min-width:220px"><label>Profil Adı</label><input id="profName" placeholder="kampanya"/></div>
+              <div class="input" style="flex:1;min-width:320px"><label>Parametreler (JSON)</label><textarea id="profParams" rows="5" placeholder='{"per_day":60,"return_rate":0.07,"cancel_rate":0.02,"coupon_rate":0.10,"dow":{"6":{"per_day":120},"7":{"per_day":120}}}'></textarea></div>
+              <button class="btn" id="saveProfile">Kaydet</button>
+            </div>
+          </details>
+          <div class="row" style="margin-top:10px">
+            <button class="btn ghost" id="loadProfiles">Profilleri Listele</button>
+            <div class="input"><label>Başlangıç</label><input type="date" id="runFrom"></div>
+            <div class="input"><label>Bitiş</label><input type="date" id="runTo"></div>
+            <div class="input"><label>Profil</label><input id="runProfileName" placeholder="kampanya"></div>
+            <button class="btn" id="runProfile">Profili Çalıştır</button>
+            <span id="runStatus" class="hint"></span>
+          </div>
+          <pre id="profilesOut" style="margin-top:10px"></pre>
+        </div>
+      </section>
+
+      <!-- Reports -->
+      <section id="reports" class="section">
+        <div class="grid cols-2">
+          <div class="card"><h3>Günlük Rapor</h3><a class="btn" href="/api/export/daily.csv">İndir (CSV)</a></div>
+          <div class="card"><h3>Ürün Raporu</h3><a class="btn" href="/api/export/products.csv">İndir (CSV)</a></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@ a{color:var(--brand);text-decoration:none}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);background:rgba(16,22,42,.6);backdrop-filter:saturate(150%) blur(6px);position:sticky;top:0;z-index:10}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-badge{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 6px 18px rgba(108,140,255,.35)}
-.nav a{margin-left:14px;color:var(--muted)}
+.nav a:not(.btn) { margin-left:14px; color: var(--muted); }
 .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--brand),#7ea1ff);padding:10px 14px;border-radius:12px;color:white;border:1px solid rgba(255,255,255,.1)}
 .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
 .hero{padding:64px 0;text-align:center}
